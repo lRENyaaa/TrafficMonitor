@@ -1,0 +1,5 @@
+name: TrafficMonitor
+version: '1.0-SNAPSHOT'
+main: ltd.rymc.traffic.TrafficMonitor
+api-version: '1.13'
+folia-supported: true
