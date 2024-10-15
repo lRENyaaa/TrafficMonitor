@@ -19,15 +19,25 @@
 package ltd.rymc.traffic;
 
 import ltd.rymc.traffic.injector.NettyInjector;
+import ltd.rymc.traffic.listener.PlayerListener;
+import ltd.rymc.traffic.utils.PlayerChannelUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import space.arim.morepaperlib.MorePaperLib;
 
 public final class TrafficMonitor extends JavaPlugin {
 
     private static TrafficMonitor instance;
+    private static MorePaperLib morePaperLib;
 
     @Override
     public void onEnable() {
         instance = this;
+        morePaperLib = new MorePaperLib(this);
+        if (!PlayerChannelUtil.getInitState()){
+            getLogger().severe("Failed to initialize player channel getter");
+        }
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
         try {
             new NettyInjector().inject();
         } catch (ReflectiveOperationException e) {
@@ -37,5 +47,9 @@ public final class TrafficMonitor extends JavaPlugin {
 
     public static TrafficMonitor getInstance(){
         return instance;
+    }
+
+    public static MorePaperLib getMorePaperLib(){
+        return morePaperLib;
     }
 }

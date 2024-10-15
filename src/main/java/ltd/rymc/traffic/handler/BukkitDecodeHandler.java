@@ -22,12 +22,23 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import ltd.rymc.traffic.TrafficMonitor;
+import ltd.rymc.traffic.listener.UserConnection;
+import org.bukkit.entity.Player;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class BukkitDecodeHandler extends MessageToMessageDecoder<ByteBuf> {
+
+    private static final Logger logger = TrafficMonitor.getInstance().getLogger();
+
     private long totalReadBytes = 0;
+    private final UserConnection userConnection;
+
+    public BukkitDecodeHandler(UserConnection userConnection){
+        this.userConnection = userConnection;
+    }
 
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> out) {
@@ -38,7 +49,8 @@ public class BukkitDecodeHandler extends MessageToMessageDecoder<ByteBuf> {
         totalReadBytes += readableBytes;
 
         String format = String.format("IP: %s, get bytes: %d, Total get bytes: %d", ipAddress, readableBytes, totalReadBytes);
-        TrafficMonitor.getInstance().getLogger().info(format);
+        Player player = userConnection.getPlayer();
+        logger.info("Player: " + (player == null ? "null" : player.getName()) + ", " + format);
 
         out.add(byteBuf.retain());
     }

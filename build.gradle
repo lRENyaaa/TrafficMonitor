@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 group = 'ltd.rymc'
@@ -10,11 +11,15 @@ repositories {
     maven {
         url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
     }
+    maven {
+        url 'https://mvn-repo.arim.space/lesser-gpl3/'
+    }
 }
 
 dependencies {
     compileOnly 'org.bukkit:bukkit:1.13.2-R0.1-SNAPSHOT'
     compileOnly 'io.netty:netty-all:4.1.97.Final'
+    implementation 'space.arim.morepaperlib:morepaperlib:0.4.3'
 }
 
 def targetJavaVersion = 17
@@ -42,4 +47,8 @@ processResources {
     filesMatching('plugin.yml') {
         expand props
     }
+}
+
+tasks.build {
+    dependsOn tasks.shadowJar
 }

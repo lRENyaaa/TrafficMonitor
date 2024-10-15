@@ -25,14 +25,15 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import ltd.rymc.traffic.handler.BukkitDecodeHandler;
 import ltd.rymc.traffic.handler.BukkitEncodeHandler;
+import ltd.rymc.traffic.listener.UserConnection;
 
 import java.lang.reflect.Method;
 
 public final class BukkitChannelInitializer extends ChannelInitializer<Channel> {
 
 
-    public static final String T_MONITOR_ENCODER = "t-monitor-encoder";
-    public static final String T_MONITOR_DECODER = "t-monitor-decoder";
+    public static final String TRAFFIC_MONITOR_ENCODER = "traffic-monitor-encoder";
+    public static final String TRAFFIC_MONITOR_DECODER = "traffic-monitor-decoder";
     public static final String MINECRAFT_ENCODER = "encoder";
     public static final String MINECRAFT_DECODER = "decoder";
     public static final String MINECRAFT_OUTBOUND_CONFIG = "outbound_config";
@@ -62,11 +63,13 @@ public final class BukkitChannelInitializer extends ChannelInitializer<Channel> 
     }
 
     public static void afterChannelInitialize(Channel channel) {
+        UserConnection userConnection = new UserConnection(channel);
+
         // Add our transformers
         final ChannelPipeline pipeline = channel.pipeline();
         final String encoderName = pipeline.get(MINECRAFT_OUTBOUND_CONFIG) != null ? MINECRAFT_OUTBOUND_CONFIG : MINECRAFT_ENCODER;
-        pipeline.addBefore(encoderName, T_MONITOR_ENCODER, new BukkitEncodeHandler());
-        pipeline.addBefore(MINECRAFT_DECODER, T_MONITOR_DECODER, new BukkitDecodeHandler());
+        pipeline.addBefore(encoderName, TRAFFIC_MONITOR_ENCODER, new BukkitEncodeHandler(userConnection));
+        pipeline.addBefore(MINECRAFT_DECODER, TRAFFIC_MONITOR_DECODER, new BukkitDecodeHandler(userConnection));
     }
 
 }
