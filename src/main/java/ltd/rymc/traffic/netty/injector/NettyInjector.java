@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter", "unchecked"})
 public class NettyInjector {
 
-    private static Logger LOGGER = TrafficMonitor.getInstance().getLogger();
+    private static final Logger LOGGER = TrafficMonitor.getInstance().getLogger();
 
     public static void init() throws Exception {
         LOGGER.info("Injecting traffic monitor into Netty pipeline.");

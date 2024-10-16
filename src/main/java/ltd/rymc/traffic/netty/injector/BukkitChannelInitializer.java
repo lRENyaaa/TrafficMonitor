@@ -21,12 +21,13 @@
 package ltd.rymc.traffic.netty.injector;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import ltd.rymc.traffic.monitor.PlayerTrafficMonitor;
 
 import java.lang.reflect.Method;
 
-public final class BukkitChannelInitializer extends io.netty.channel.ChannelInitializer<Channel> {
+public final class BukkitChannelInitializer extends ChannelInitializer<Channel> {
 
 
     public static final String TRAFFIC_MONITOR_ENCODER = "traffic-monitor-encoder";
@@ -35,11 +36,11 @@ public final class BukkitChannelInitializer extends io.netty.channel.ChannelInit
     public static final String MINECRAFT_DECODER = "decoder";
     public static final String MINECRAFT_OUTBOUND_CONFIG = "outbound_config";
     private static final Method INIT_CHANNEL_METHOD;
-    private final io.netty.channel.ChannelInitializer<Channel> original;
+    private final ChannelInitializer<Channel> original;
 
     static {
         try {
-            INIT_CHANNEL_METHOD = io.netty.channel.ChannelInitializer.class.getDeclaredMethod("initChannel", Channel.class);
+            INIT_CHANNEL_METHOD = ChannelInitializer.class.getDeclaredMethod("initChannel", Channel.class);
             INIT_CHANNEL_METHOD.setAccessible(true);
         } catch (final ReflectiveOperationException e) {
             throw new RuntimeException(e);
@@ -47,7 +48,7 @@ public final class BukkitChannelInitializer extends io.netty.channel.ChannelInit
     }
 
 
-    public BukkitChannelInitializer(io.netty.channel.ChannelInitializer<Channel> oldInit) {
+    public BukkitChannelInitializer(ChannelInitializer<Channel> oldInit) {
         this.original = oldInit;
     }
 
