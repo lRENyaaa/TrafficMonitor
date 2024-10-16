@@ -37,7 +37,7 @@ public class PlayerChannelUtil {
     private static final Field NETWORK_MANAGER_FIELD;
     private static final Field CHANNEL_FIELD;
 
-    private static boolean initState = false;
+    private static boolean initState;
 
     static {
         try {
@@ -75,9 +75,8 @@ public class PlayerChannelUtil {
     }
 
     public static Channel getChannel(Player player) {
-        if (!initState) return null;
+        if (!initState) throw new IllegalStateException("Player channel util hasn't been loaded!");
         try {
-
 
             Object nmsPlayer = GET_HANDLE_METHOD.invoke(player);
             Object playerConnection = PLAYER_CONNECTION_FIELD.get(nmsPlayer);

@@ -18,14 +18,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package ltd.rymc.traffic.injector;
+package ltd.rymc.traffic.netty.injector;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import ltd.rymc.traffic.TrafficMonitor;
-import ltd.rymc.traffic.initializer.BukkitChannelInitializer;
 import ltd.rymc.traffic.utils.NMSUtil;
 import ltd.rymc.traffic.utils.ReflectionUtil;
 import ltd.rymc.traffic.utils.SynchronizedListWrapper;
@@ -33,12 +32,22 @@ import ltd.rymc.traffic.utils.SynchronizedListWrapper;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.logging.Logger;
 
 @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter", "unchecked"})
 public class NettyInjector {
+
+    private static Logger LOGGER = TrafficMonitor.getInstance().getLogger();
+
+    public static void init() throws Exception {
+        LOGGER.info("Injecting traffic monitor into Netty pipeline.");
+        new NettyInjector().inject();
+        LOGGER.info("Netty pipeline injected!");
+    }
+
     public void inject() throws ReflectiveOperationException {
 
-        // get ServerConnection
+        // Get ServerConnection
         Object connection = getServerConnection();
         if (connection == null) {
             throw new RuntimeException("Failed to find the core component 'ServerConnection'");
@@ -74,8 +83,6 @@ public class NettyInjector {
 
         }
 
-
-        TrafficMonitor.getInstance().getLogger().info("Injected TrafficMonitor into Netty pipeline.");
     }
 
     private void injectChannelFuture(ChannelFuture future) throws ReflectiveOperationException {

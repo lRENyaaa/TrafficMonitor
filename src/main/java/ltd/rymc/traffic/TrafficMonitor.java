@@ -18,9 +18,8 @@
  */
 package ltd.rymc.traffic;
 
-import ltd.rymc.traffic.injector.NettyInjector;
-import ltd.rymc.traffic.listener.PlayerListener;
-import ltd.rymc.traffic.utils.PlayerChannelUtil;
+import ltd.rymc.traffic.monitor.PlayerTrafficMonitor;
+import ltd.rymc.traffic.netty.injector.NettyInjector;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import space.arim.morepaperlib.MorePaperLib;
@@ -32,17 +31,21 @@ public final class TrafficMonitor extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        init();
+
+        try {
+            NettyInjector.init();
+            PlayerTrafficMonitor.init();
+        } catch (Exception e) {
+            getLogger().severe(e.getMessage());
+            Bukkit.getPluginManager().disablePlugin(this);
+        }
+
+    }
+
+    private void init(){
         instance = this;
         morePaperLib = new MorePaperLib(this);
-        if (!PlayerChannelUtil.getInitState()){
-            getLogger().severe("Failed to initialize player channel getter");
-        }
-        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
-        try {
-            new NettyInjector().inject();
-        } catch (ReflectiveOperationException e) {
-            getLogger().severe("Failed to inject Netty pipeline: " + e.getMessage());
-        }
     }
 
     public static TrafficMonitor getInstance(){

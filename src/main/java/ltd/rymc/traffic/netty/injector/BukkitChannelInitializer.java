@@ -18,18 +18,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package ltd.rymc.traffic.initializer;
+package ltd.rymc.traffic.netty.injector;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
-import ltd.rymc.traffic.handler.BukkitDecodeHandler;
-import ltd.rymc.traffic.handler.BukkitEncodeHandler;
-import ltd.rymc.traffic.listener.UserConnection;
+import ltd.rymc.traffic.monitor.PlayerTrafficMonitor;
 
 import java.lang.reflect.Method;
 
-public final class BukkitChannelInitializer extends ChannelInitializer<Channel> {
+public final class BukkitChannelInitializer extends io.netty.channel.ChannelInitializer<Channel> {
 
 
     public static final String TRAFFIC_MONITOR_ENCODER = "traffic-monitor-encoder";
@@ -38,11 +35,11 @@ public final class BukkitChannelInitializer extends ChannelInitializer<Channel> 
     public static final String MINECRAFT_DECODER = "decoder";
     public static final String MINECRAFT_OUTBOUND_CONFIG = "outbound_config";
     private static final Method INIT_CHANNEL_METHOD;
-    private final ChannelInitializer<Channel> original;
+    private final io.netty.channel.ChannelInitializer<Channel> original;
 
     static {
         try {
-            INIT_CHANNEL_METHOD = ChannelInitializer.class.getDeclaredMethod("initChannel", Channel.class);
+            INIT_CHANNEL_METHOD = io.netty.channel.ChannelInitializer.class.getDeclaredMethod("initChannel", Channel.class);
             INIT_CHANNEL_METHOD.setAccessible(true);
         } catch (final ReflectiveOperationException e) {
             throw new RuntimeException(e);
@@ -50,7 +47,7 @@ public final class BukkitChannelInitializer extends ChannelInitializer<Channel> 
     }
 
 
-    public BukkitChannelInitializer(ChannelInitializer<Channel> oldInit) {
+    public BukkitChannelInitializer(io.netty.channel.ChannelInitializer<Channel> oldInit) {
         this.original = oldInit;
     }
 
@@ -63,13 +60,13 @@ public final class BukkitChannelInitializer extends ChannelInitializer<Channel> 
     }
 
     public static void afterChannelInitialize(Channel channel) {
-        UserConnection userConnection = new UserConnection(channel);
+        PlayerTrafficMonitor monitor = PlayerTrafficMonitor.of(channel);
 
         // Add our transformers
         final ChannelPipeline pipeline = channel.pipeline();
         final String encoderName = pipeline.get(MINECRAFT_OUTBOUND_CONFIG) != null ? MINECRAFT_OUTBOUND_CONFIG : MINECRAFT_ENCODER;
-        pipeline.addBefore(encoderName, TRAFFIC_MONITOR_ENCODER, new BukkitEncodeHandler(userConnection));
-        pipeline.addBefore(MINECRAFT_DECODER, TRAFFIC_MONITOR_DECODER, new BukkitDecodeHandler(userConnection));
+        pipeline.addBefore(encoderName, TRAFFIC_MONITOR_ENCODER, monitor.getEncodeProcess());
+        pipeline.addBefore(MINECRAFT_DECODER, TRAFFIC_MONITOR_DECODER, monitor.getDecodeProcess());
     }
 
 }
